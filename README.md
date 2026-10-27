@@ -67,3 +67,12 @@ A separate panel shows pet groups, levels and soul totals for the available pet 
 - Keep the **Daten** folder when updating to preserve your settings and saved progress.
 - Closing the settings window keeps the tracker running in the system tray.
 - To close it completely, right-click the tray icon and select **Exit**.
+
+
+## Source code
+
+The complete source is available in [`src/`](src/), with regression tests in
+[`tests/`](tests/) and the original notices in [`licenses/`](licenses/).
+See the [build and review guide](docs/SOURCE-README.md#build-from-source) to build
+the Windows application yourself. The public repository excludes personal saved
+character data and private captures.

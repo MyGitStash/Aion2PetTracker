@@ -1,0 +1,21 @@
+AION 2 Pet Tracker 1.0.3: eigener Standalone-Host und Persistenz (26.10.2026).
+Gemeinsamer GPL-3.0-Parser aus dr89mh/aion2-cube-radar c9c8497ed03b06f0b281f431e0c1ce6204c7c866,
+mit gekennzeichneten Ableitungen von cyberbadger6969/aion2-dps-meter @414de5c.
+Der dedizierte PetTracker.Core kompiliert ausschliesslich Capture/Framing,
+Protokollhelfer, Pet-Tracking und atomare Speicherung. Keine Radar-, DPS- oder
+Auto-F-Implementierung und kein AionMeter-Projekt sind im Produkt enthalten.
+Pet-Protokoll: elkaida/AION2-pet-tracker @7a8afb636c0516f07cc45918687142d77c94bd5a, MIT.
+Pet-Katalog/Portraets: siehe pets/PET-ASSETS.md und pets/data/PET-SOURCES.md.
+Header-Symbole aus unveraenderter Nutzer-Vorlage, deren Zahlen werden nicht kopiert.
+Runtime-Pakete: SharpPcap6.3.1 MIT, PacketDotNet1.4.8 MPL-2.0, K4os.Compression.LZ4 1.3.8 MIT;
+.NET10-Laufzeit mit Notices. Npcap nicht mitverteilt. Spielgrafikrechte bleiben beim Inhaber.
+Pet registration/level layout reference: same pinned MIT source,
+Client/Aion2/Protocol/Aion2FrameDecoder.cs DecodePetAdded/DecodePetLevel;
+Client/Aion2/Aion2EntityDirectory.cs NotePetAdded/NotePetLevel.
+Shop-Protokoll/Feldform und Item->Pet-Mapping als Referenz:
+SkeeveAN/Aion-DPS-Meter @b744eddd26036fc9a05551534a0e29083671aca8,
+Client/Aion2/Protocol/Aion2FrameDecoder.cs DecodeShop,
+Client/assets/aion2/pets/pets.json shop. MIT, Copyright 2026 SkeeveTV.
+Aktuelle Tabbytes und Ablaufzeit mit eigener passiver Beobachtung bestaetigt.
+Der lokale Header-Vergleich verwendet nur unveraenderliche Menue-Ornamente
+der bereitgestellten Nutzervorlage; keine Kontoinformationen im Signaturmodell.

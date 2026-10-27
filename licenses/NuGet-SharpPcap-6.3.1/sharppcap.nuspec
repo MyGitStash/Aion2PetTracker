@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>SharpPcap</id>
+    <version>6.3.1</version>
+    <authors>Tamir Gal, Chris Morgan and others</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <projectUrl>https://github.com/chmorgan/sharppcap</projectUrl>
+    <description>SharpPcap is a cross-platform(Windows, Mac, Linux) packet capture framework for the .NET environment.
+      It provides an API for capturing, injecting, analyzing and building packets using any .NET language such as C# and VB.NET.</description>
+    <copyright>Tamir Gal, Chris Morgan and others</copyright>
+    <repository type="git" url="https://github.com/chmorgan/sharppcap" commit="bfedf297e7410ffcf44e05d14f7fbef304f20895" />
+    <dependencies>
+      <group targetFramework="net8.0">
+        <dependency id="PacketDotNet" version="1.4.8" exclude="Build,Analyzers" />
+        <dependency id="System.Memory" version="4.6.3" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Encoding.CodePages" version="9.0.5" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="PacketDotNet" version="1.4.8" exclude="Build,Analyzers" />
+        <dependency id="System.Memory" version="4.6.3" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Encoding.CodePages" version="9.0.5" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

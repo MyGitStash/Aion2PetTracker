@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Aion2PetTracker.App/Aion2PetTracker.App.csproj" />
+    <Project Path="src/Aion2PetTracker.Core/Aion2PetTracker.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Aion2PetTracker.Tests/Aion2PetTracker.Tests.csproj" />
+  </Folder>
+</Solution>

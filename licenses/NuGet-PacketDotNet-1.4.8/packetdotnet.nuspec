@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>PacketDotNet</id>
+    <version>1.4.8</version>
+    <authors>Chris Morgan (chmorgan@gmail.com)</authors>
+    <license type="expression">MPL-2.0</license>
+    <licenseUrl>https://licenses.nuget.org/MPL-2.0</licenseUrl>
+    <projectUrl>https://github.com/dotpcap/packetnet</projectUrl>
+    <description>High performance .NET assembly for dissecting and constructing network packets such as Ethernet, IP, TCP, UDP, etc.</description>
+    <tags>packet packets ethernet ip tcp udp icmp network</tags>
+    <repository type="git" url="https://github.com/dotpcap/packetnet" commit="690707ce56d6e9c266daf6236c4f76ac5035334c" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.7.2">
+        <dependency id="System.Runtime.CompilerServices.Unsafe" version="6.0.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net8.0">
+        <dependency id="System.Runtime.CompilerServices.Unsafe" version="6.0.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net9.0">
+        <dependency id="System.Runtime.CompilerServices.Unsafe" version="6.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

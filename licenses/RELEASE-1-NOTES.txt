@@ -1,0 +1,7 @@
+Release 1 source organisation, October 27, 2026.
+Capture, Protocol, Diagnostics and Pets were carried forward from the prior
+CubeRadar.Core source folders into Aion2PetTracker.Core; AtomicJsonFile is in
+Storage. The Windows host is Aion2PetTracker.App. Namespaces were renamed,
+formatting normalised and the old empty project/link indirection removed.
+Original copyright, source references and license texts remain applicable.
+Npcap is not bundled. Setup opens the official vendor page only on user action.

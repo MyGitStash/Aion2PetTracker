@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>Aion2PetTracker</AssemblyName>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <SelfContained>true</SelfContained>
+    <Product>Aion2 Pet Tracker</Product>
+    <Description>Pet souls and Cloud Merchant overlay for AION 2</Description>
+    <NoWarn>$(NoWarn);WFO1000</NoWarn>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationIcon>Resources/tracker.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Aion2PetTracker.Core/Aion2PetTracker.Core.csproj" />
+    <EmbeddedResource Include="Resources/tracker.ico" LogicalName="tracker.ico" />
+    <EmbeddedResource Include="Resources/Assets/Pets/*.png" LogicalName="peticon/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Resources/Assets/SoulHeaderReference.png" LogicalName="gameicon/SoulHeaderReference.png" />
+    <EmbeddedResource Include="../../config/pets.json" LogicalName="pets.json" />
+    <EmbeddedResource Include="../../config/shop-items.json" LogicalName="shop-items.json" />
+    <EmbeddedResource Include="../../config/shop-header-signature.json" LogicalName="shop-header-signature.json" />
+  </ItemGroup>
+</Project>
