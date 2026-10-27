@@ -6,7 +6,8 @@ using Aion2PetTracker.Core.Protocol;
 
 namespace Aion2PetTracker.App;
 
-internal sealed record TrackerSnapshot(string Capture, string? Character, ushort? Server, bool Identified, PetSoulView Pets, SoulCurrencyView Wallet, long Packets, long Frames, long Gaps, string? SaveError, bool SavePending, MerchantView? Merchant);
+internal sealed record MerchantDiagnostics(long Accepted, long Rejected, long LastReceivedMs, byte? LastTabCode, MerchantTab? Tab, bool LastMessageRejected, long IgnoredOtherFlow);
+internal sealed record TrackerSnapshot(string Capture, string? Character, ushort? Server, bool Identified, PetSoulView Pets, SoulCurrencyView Wallet, long Packets, long Frames, long Gaps, string? SaveError, bool SavePending, MerchantView? Merchant, MerchantDiagnostics Shop);
 internal sealed class PetTrackerService : IDisposable
 {
     private readonly object _gate = new();
@@ -17,6 +18,7 @@ internal sealed class PetTrackerService : IDisposable
     private readonly MerchantTracker _merchant;
     private int _flowId;
     private long _gaps;
+    private long _merchantIgnoredFrames;
     private bool _disposed;
     public static long Now => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     public static PetCatalog LoadCatalog()
@@ -41,7 +43,11 @@ internal sealed class PetTrackerService : IDisposable
     private void OnFrame(GameFlow flow, in FrameMeta meta, ReadOnlySpan<byte> body)
     {
         if (flow.Id < _flowId)
+        {
+            if (meta.Opcode == MerchantProtocol.Opcode)
+                _merchantIgnoredFrames++;
             return;
+        }
         if (flow.Id > _flowId)
         {
             if (_flowId != 0)
@@ -68,7 +74,8 @@ internal sealed class PetTrackerService : IDisposable
                 _gaps = _session.Tracker.Gaps;
                 _souls.Gap();
             }
-            return new(_sniffer.Status, _souls.Character, _souls.ServerId, _souls.Identified, _souls.Pets.Snapshot(Now), _souls.WalletView(), _session.Packets, _session.Census.Ops.Values.Sum(s => s.Count), _gaps, _store.Error, _store.Pending, _merchant.View(Now, _souls.PetInfo, _souls.DisplayCharacter, _souls.Identified));
+            return new(_sniffer.Status, _souls.Character, _souls.ServerId, _souls.Identified, _souls.Pets.Snapshot(Now), _souls.WalletView(), _session.Packets, _session.Census.Ops.Values.Sum(s => s.Count), _gaps, _store.Error, _store.Pending, _merchant.View(Now, _souls.PetInfo, _souls.DisplayCharacter, _souls.Identified),
+                new(_merchant.Accepted, _merchant.Rejected, _merchant.LastReceivedMs, _merchant.LastTabCode, _merchant.CurrentPage?.Tab, _merchant.LastMessageRejected, _merchantIgnoredFrames));
         }
     }
     public void Dispose()

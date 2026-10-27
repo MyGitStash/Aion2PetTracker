@@ -27,6 +27,10 @@ Npcap -> adapter/TCP selection -> reassembly -> framing/LZ4
   information. Rendering uses only the application's own windows.
 - **App/Services/MerchantSceneProbe** checks a bounded visible shop header,
   at most once a second while relevant. Pixel data is not persisted or sent.
+  The search handles UI scale and translation; a second bounded anchor covers
+  centred letterboxing. Manual display skips pixel capture and retains the
+  foreground-game and valid-offer requirements. The cached foreground-window
+  identity is checked again on every UI update, including after Alt-Tab.
 
 ## Data and uncertainty
 

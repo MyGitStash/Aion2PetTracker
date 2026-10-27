@@ -19,6 +19,10 @@ internal sealed class TrackerPreferences
     }
     public int OverlayOpacity { get; set; } = 90;
     public bool MerchantInfo { get; set; } = true;
+    public bool MerchantManualDisplay
+    {
+        get; set;
+    }
     public int? MerchantX
     {
         get; set;

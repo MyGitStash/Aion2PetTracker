@@ -25,6 +25,9 @@ public class MerchantTests
     [InlineData(0xc9, MerchantTab.Special)]
     [InlineData(0xcc, MerchantTab.Pets)]
     [InlineData(0xcb, MerchantTab.Skins)]
+    [InlineData(0x65, MerchantTab.Special)]
+    [InlineData(0x68, MerchantTab.Pets)]
+    [InlineData(0x67, MerchantTab.Skins)]
     public void ReadsActualTabItemMappingAndDiscountedPrice(byte tab, MerchantTab expected)
     {
         Assert.True(Protocol.TryRead(100, Page(tab), out var page));
@@ -102,6 +105,21 @@ public class MerchantTests
         t.OnFrame(200, 0x9156, Page());
         t.OnFrame(100, 0x9156, Page(0xc9));
         Assert.Equal(MerchantTab.Pets, t.CurrentPage!.Tab);
+    }
+    [Fact]
+    public void ReopeningAValidTabAndStartingANewConnectionClearTheOldFailureStatus()
+    {
+        var t = new MerchantTracker(Protocol, Catalog);
+        t.OnFrame(100, MerchantProtocol.Opcode, Page(0xff));
+        Assert.True(t.LastMessageRejected);
+        t.OnFrame(200, MerchantProtocol.Opcode, Page(0x68));
+        Assert.False(t.LastMessageRejected);
+        Assert.NotNull(t.View(201, _ => new(null, true), null, false));
+        t.Reset();
+        Assert.Null(t.CurrentPage);
+        Assert.Null(t.LastTabCode);
+        Assert.Equal(0, t.LastReceivedMs);
+        Assert.False(t.LastMessageRejected);
     }
     [Fact]
     public void FullBaselineKnowsUnownedZeroAndKeepsItAsCachedAfterRestore()

@@ -1,5 +1,9 @@
 # Aion2 Pet Tracker
 
+For the shop compatibility update and fallback option, see
+[Release 1.0.1](RELEASE-1.0.1.md). The original Release 1 notes below describe the
+baseline; current builds include the newer header search and tab compatibility.
+
 A compact Windows overlay for pet souls, genus crystals and pet progress at
 the Cloud Merchant in AION 2. **Release 1** is the first named public release.
 The app, executable and portable folder have no version suffix.

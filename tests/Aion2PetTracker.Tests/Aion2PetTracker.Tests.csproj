@@ -14,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="../../config/pets.json" Link="config/pets.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../config/shop-header-signature.json" Link="config/shop-header-signature.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../fixtures/players/**" Link="fixtures/players/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-param([string]$Output = (Join-Path $PSScriptRoot '..\artifacts\release'))
+param([string]$Output = (Join-Path $PSScriptRoot '..\artifacts\release'), [string]$ReleaseTag = 'release-1.0.1')
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $publishExe = Join-Path $repoRoot 'artifacts\publish\Aion2PetTracker.exe'
@@ -26,8 +26,8 @@ try {
     $dirty = & git status --porcelain
     if ($LASTEXITCODE -ne 0 -or $dirty) { throw 'Commit the complete source before packaging' }
     $commit = (& git rev-parse HEAD).Trim()
-    $tagCommit = (& git rev-parse 'release-1^{commit}').Trim()
-    if ($LASTEXITCODE -ne 0 -or $tagCommit -ne $commit) { throw 'release-1 must point to the source being packaged' }
+    $tagCommit = (& git rev-parse ($ReleaseTag + '^{commit}')).Trim()
+    if ($LASTEXITCODE -ne 0 -or $tagCommit -ne $commit) { throw 'The release tag must point to the source being packaged' }
     New-Item -Path $Output -ItemType Directory -Force | Out-Null
     $outputRoot = [IO.Path]::GetFullPath($Output)
     $stage = Join-Path $repoRoot ('artifacts\packages\' + [Guid]::NewGuid().ToString('N'))
@@ -67,7 +67,7 @@ try {
     $hashes = Get-ChildItem -LiteralPath $outputRoot -File | Where-Object { $_.Extension -in '.zip', '.bundle' } |
         Sort-Object Name | ForEach-Object { "$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())  $($_.Name)" }
     [IO.File]::WriteAllLines((Join-Path $outputRoot 'SHA256SUMS.txt'), [string[]]$hashes, [Text.UTF8Encoding]::new($false))
-    [ordered]@{ product = 'Aion2 Pet Tracker'; release = 1; source_commit = $commit; tag = 'release-1'; npcap_bundled = $false; personal_data_included = $false } |
+    [ordered]@{ product = 'Aion2 Pet Tracker'; release = '1.0.1'; source_commit = $commit; tag = $ReleaseTag; npcap_bundled = $false; personal_data_included = $false } |
         ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot 'release.json') -Encoding utf8
     Write-Host "Archives ready: $outputRoot"
 } finally { Pop-Location }

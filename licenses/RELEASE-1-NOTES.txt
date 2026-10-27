@@ -5,3 +5,9 @@ Storage. The Windows host is Aion2PetTracker.App. Namespaces were renamed,
 formatting normalised and the old empty project/link indirection removed.
 Original copyright, source references and license texts remain applicable.
 Npcap is not bundled. Setup opens the official vendor page only on user action.
+
+Shop compatibility update: the pinned SkeeveAN MIT DecodeShop reference
+documents 65/68/67 tab bytes; Global c9/cc/cb was observed in the original
+local capture. Both sets are now accepted, with the existing strict offer
+validation retained. The new header search and manual fallback are original
+project changes. No new redistribution rights are asserted for game artwork.

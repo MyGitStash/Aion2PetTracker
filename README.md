@@ -71,6 +71,12 @@ A separate panel shows pet groups, levels and soul totals for the available pet 
 
 ## Source code
 
+**Shop compatibility update:** if the merchant panel does not appear, use the
+[latest release](https://github.com/MyGitStash/Aion2PetTracker/releases/latest),
+open **Pets** or **Special**, and check the shop status in settings. If needed,
+enable **Show merchant panel while game is focused**. This fallback uses the
+last received valid offers. See [update details](docs/RELEASE-1.0.1.md).
+
 The complete source is available in [`src/`](src/), with regression tests in
 [`tests/`](tests/) and the original notices in [`licenses/`](licenses/).
 See the [build and review guide](docs/SOURCE-README.md#build-from-source) to build

@@ -49,6 +49,11 @@ internal sealed class MerchantOverlay : Form
         };
     }
     protected override bool ShowWithoutActivation => true;
+    internal void Reopen()
+    {
+        _dismissed = 0;
+        _dirty = true;
+    }
     protected override CreateParams CreateParams
     {
         get
@@ -77,6 +82,8 @@ internal sealed class MerchantOverlay : Form
         }
         float k = preview ? scale : DeviceDpi / 96f;
         var area = scene.Bounds.IsEmpty ? Screen.PrimaryScreen!.WorkingArea : Rectangle.Intersect(scene.Bounds, Screen.FromRectangle(scene.Bounds).WorkingArea);
+        if (area.Width <= 0 || area.Height <= 0)
+            area = Screen.PrimaryScreen!.WorkingArea;
         _rowsPerColumn = Math.Max(1, (int)(area.Height / k - 108) / 54);
         int columns = (view.Rows.Count + _rowsPerColumn - 1) / _rowsPerColumn;
         int rows = Math.Min(_rowsPerColumn, view.Rows.Count);

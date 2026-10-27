@@ -13,7 +13,7 @@ public sealed record MerchantPetRow(int PetId, string Name, string Genus, PetPro
 public sealed record MerchantView(MerchantTab Tab, long ReceivedMs, long ExpiresMs, string? Character, bool CharacterConfirmed, IReadOnlyList<MerchantPetRow> Rows);
 
 /// <summary>Black Cloud shop 9156. Field shape/item mapping corroborated against pinned MIT reference and
-/// live Global 2026-10-26. Current tab IDs differ from the reference: c9 Special, cc Pets, cb Skins.
+/// live Global 2026-10-26. Supports Global c9/cc/cb and pinned reference 65/68/67 tab IDs.
 /// Do not use Owned labels, truncated text, kills, or price previews to infer the player's soul count.</summary>
 public sealed class MerchantProtocol(IReadOnlyDictionary<uint, int> items)
 {
@@ -30,9 +30,9 @@ public sealed class MerchantProtocol(IReadOnlyDictionary<uint, int> items)
             return false;
         MerchantTab? tab = body[0] switch
         {
-            0xC9 => MerchantTab.Special,
-            0xCC => MerchantTab.Pets,
-            0xCB => MerchantTab.Skins,
+            0xC9 or 0x65 => MerchantTab.Special,
+            0xCC or 0x68 => MerchantTab.Pets,
+            0xCB or 0x67 => MerchantTab.Skins,
             _ => null
         };
         int expected = body[1];
@@ -77,14 +77,36 @@ public sealed class MerchantTracker(MerchantProtocol protocol, PetCatalog catalo
         get; private set;
     }
     public MerchantPage? CurrentPage => _page;
-    public void Reset() => _page = null;
+    public long LastReceivedMs
+    {
+        get; private set;
+    }
+    public byte? LastTabCode
+    {
+        get; private set;
+    }
+    public bool LastMessageRejected
+    {
+        get; private set;
+    }
+    public void Reset()
+    {
+        _page = null;
+        LastReceivedMs = 0;
+        LastTabCode = null;
+        LastMessageRejected = false;
+    }
     public void OnFrame(long time, ushort opcode, ReadOnlySpan<byte> body)
     {
         if (opcode != MerchantProtocol.Opcode)
             return;
+        LastReceivedMs = time;
+        LastTabCode = body.Length > 0 ? body[0] : null;
+        LastMessageRejected = false;
         if (!protocol.TryRead(time, body, out var page))
         {
             Rejected++;
+            LastMessageRejected = true;
             _page = null;
             return;
         }
