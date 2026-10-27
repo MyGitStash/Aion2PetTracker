@@ -1,12 +1,18 @@
-# Aion2 Pet Tracker — Release 1
+# Aion2 Pet Tracker
 
 Track your **pet souls, crystal balances and pet progress** with compact overlays for AION 2.
+
+## ⬇️ Download for Windows
+
+### [Download Aion2 Pet Tracker](https://github.com/MyGitStash/Aion2PetTracker/releases/latest/download/Aion2-Pet-Tracker.zip)
+
+**One ZIP. Extract it, run the tracker, then start the game.** No separate .NET installation is needed.
 
 <img width="840" height="248" alt="Pet soul tracker showing a pet portrait, level and soul progress" src="https://github.com/user-attachments/assets/4881e23b-175f-467c-9a69-5793da5b9654" />
 
 ## 🚀 Quick Start
 
-1. **Download and extract** the ZIP.
+1. [**Download the tracker ZIP**](https://github.com/MyGitStash/Aion2PetTracker/releases/latest/download/Aion2-Pet-Tracker.zip) and **extract it** to a folder.
 2. Run **Aion2PetTracker.exe**.
 3. If prompted, install [Npcap](https://npcap.com/#download) once, then click **Check again**.
 4. **Start AION 2 and log in.** Your character is detected automatically.
@@ -69,16 +75,21 @@ A separate panel shows pet groups, levels and soul totals for the available pet 
 - To close it completely, right-click the tray icon and select **Exit**.
 
 
-## Source code
+<details>
+<summary><strong>Cloud Merchant panel missing?</strong></summary>
 
-**Shop compatibility update:** if the merchant panel does not appear, use the
-[latest release](https://github.com/MyGitStash/Aion2PetTracker/releases/latest),
-open **Pets** or **Special**, and check the shop status in settings. If needed,
-enable **Show merchant panel while game is focused**. This fallback uses the
-last received valid offers. See [update details](docs/RELEASE-1.0.1.md).
+Open **Pets** or **Special** in the shop and check the shop status in the tracker settings.
+If needed, enable **Show merchant panel while game is focused**. This uses the last received valid offers.
+If it still does not appear, select **Copy shop diagnostics** from the tracker’s tray menu and include them in a bug report.
+
+</details>
+
+## Source code
 
 The complete source is available in [`src/`](src/), with regression tests in
 [`tests/`](tests/) and the original notices in [`licenses/`](licenses/).
 See the [build and review guide](docs/SOURCE-README.md#build-from-source) to build
 the Windows application yourself. The public repository excludes personal saved
 character data and private captures.
+
+**Just want to play? Use the download button above.** GitHub’s automatic “Source code” downloads are for building the application yourself.
