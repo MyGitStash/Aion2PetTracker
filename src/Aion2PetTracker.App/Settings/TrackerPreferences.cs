@@ -5,6 +5,7 @@ namespace Aion2PetTracker.App;
 internal sealed class TrackerPreferences
 {
     public bool PetSouls { get; set; } = true;
+    public bool AlwaysOnTop { get; set; } = true;
     public bool PetSoulsLocked
     {
         get; set;

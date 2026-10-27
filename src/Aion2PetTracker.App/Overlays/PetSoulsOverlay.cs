@@ -129,6 +129,7 @@ internal sealed class PetSoulsOverlay : Form
     private readonly Dictionary<int, PetSoulBoard> _boards = [];
     private readonly List<(PetSoulBoard Board, RectangleF Bounds)> _cards = [];
     private readonly ToolTip _tip = new();
+    private readonly OverlayRecovery _recovery = new();
     private Bitmap? _surface;
     private RectangleF _headerBounds;
     private float _scale;
@@ -143,7 +144,7 @@ internal sealed class PetSoulsOverlay : Form
         Text = "Aion2 Pet Tracker · Souls";
         FormBorderStyle = FormBorderStyle.None;
         ShowInTaskbar = false;
-        TopMost = true;
+        TopMost = prefs.AlwaysOnTop;
         StartPosition = FormStartPosition.Manual;
         // One premultiplied-alpha surface. No rectangular child-window background or color key.
         AutoScaleMode = AutoScaleMode.None;
@@ -175,6 +176,11 @@ internal sealed class PetSoulsOverlay : Form
     }
     public void RefreshState(PetSoulView? view, bool show, bool demo = false, SoulCurrencyView? currencies = null)
         => RefreshCore(view, show, demo, currencies);
+    internal void RestoreOverlay()
+    {
+        _recovery.Request();
+        _handleDirty = true;
+    }
     private void RefreshCore(PetSoulView? view, bool show, bool demo, SoulCurrencyView? currencies, float? previewScale = null)
     {
         if (_locked != _prefs.PetSoulsLocked)
@@ -190,6 +196,10 @@ internal sealed class PetSoulsOverlay : Form
                 Hide();
             return;
         }
+        // Restore a minimized native window before WinForms Size/Location updates;
+        // changing its layout first can restore it with activation.
+        if (previewScale is null)
+            _recovery.Maintain(this, _prefs.AlwaysOnTop, Present);
         var a = Screen.FromControl(this).WorkingArea;
         float k = previewScale ?? DeviceDpi / 96f;
         const int headerSpace = 48, rowPitch = 84;
@@ -248,6 +258,7 @@ internal sealed class PetSoulsOverlay : Form
         if (!Visible)
         {
             Show();
+            _recovery.Request();
             changed = true;
         }
         if (changed || _handleDirty)
@@ -255,6 +266,7 @@ internal sealed class PetSoulsOverlay : Form
             Present();
             _handleDirty = false;
         }
+        _recovery.Maintain(this, _prefs.AlwaysOnTop, Present);
     }
     private Bitmap ComposeSurface()
     {
@@ -327,6 +339,7 @@ internal sealed class PetSoulsOverlay : Form
     {
         base.OnHandleCreated(e);
         _handleDirty = true;
+        _recovery.Request();
     }
     protected override void OnDpiChanged(DpiChangedEventArgs e)
     {
@@ -363,6 +376,8 @@ internal sealed class PetSoulsOverlay : Form
     }
     protected override void WndProc(ref Message m)
     {
+        if (OverlayRecovery.IsRecoveryMessage(m.Msg))
+            RestoreOverlay();
         if (m.Msg == 0x21)
         {
             m.Result = new IntPtr(3);

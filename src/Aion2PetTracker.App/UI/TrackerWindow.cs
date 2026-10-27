@@ -27,8 +27,9 @@ internal sealed class TrackerWindow : Form
         _statusFile = statusFile;
         Text = "Aion2 Pet Tracker";
         Icon = Program.LoadIcon();
-        ClientSize = new(500, 535);
-        MinimumSize = new(516, 574);
+        ShowInTaskbar = true;
+        ClientSize = new(520, 650);
+        MinimumSize = new(536, 500);
         BackColor = Theme.Card;
         ForeColor = Theme.Text;
         StartPosition = FormStartPosition.CenterScreen;
@@ -48,10 +49,16 @@ internal sealed class TrackerWindow : Form
         var locked = new CheckBox { Text = "Lock overlays · Click through to game", Checked = prefs.PetSoulsLocked, AutoSize = true, ForeColor = Theme.Text };
         locked.CheckedChanged += (_, _) => { prefs.PetSoulsLocked = locked.Checked; Save(); };
         panel.Controls.Add(locked);
+        var topmost = new CheckBox { Text = "Always on top · Keep overlays visible after Alt-Tab", Checked = prefs.AlwaysOnTop, AutoSize = true, ForeColor = Theme.Text };
+        topmost.CheckedChanged += (_, _) => { prefs.AlwaysOnTop = topmost.Checked; RestoreOverlays(); Save(); };
+        panel.Controls.Add(topmost);
+        var restore = new Button { Text = "Restore overlays", AutoSize = true, Margin = new(0, 6, 0, 8) };
+        restore.Click += (_, _) => RestoreOverlays();
+        panel.Controls.Add(restore);
         var merchant = new CheckBox { Text = "Show pet details at Cloud Merchant", Checked = prefs.MerchantInfo, AutoSize = true, ForeColor = Theme.Text };
         merchant.CheckedChanged += (_, _) => { prefs.MerchantInfo = merchant.Checked; _merchant?.Reopen(); Save(); };
         panel.Controls.Add(merchant);
-        var manual = new CheckBox { Text = "Show merchant panel while game is focused", Checked = prefs.MerchantManualDisplay, AutoSize = true, ForeColor = Theme.Text };
+        var manual = new CheckBox { Text = "Show last merchant offers (manual mode)", Checked = prefs.MerchantManualDisplay, AutoSize = true, ForeColor = Theme.Text };
         manual.CheckedChanged += (_, _) => { prefs.MerchantManualDisplay = manual.Checked; _merchant?.Reopen(); Save(); };
         panel.Controls.Add(manual);
         panel.Controls.Add(Theme.Label("Fallback if the shop is not detected. Uses the last received offers.", 8, color: Theme.Muted));
@@ -59,11 +66,12 @@ internal sealed class TrackerWindow : Form
         var opacity = new TrackBar { Minimum = 30, Maximum = 100, Value = prefs.OverlayOpacity, Width = 420, TickStyle = TickStyle.None, Height = 30 };
         opacity.ValueChanged += (_, _) => { prefs.OverlayOpacity = opacity.Value; Save(); };
         panel.Controls.Add(opacity);
-        panel.Controls.Add(Theme.Label("Saved balances are kept between sessions.\n≈ is shown only after capture gaps or unsupported updates.\nClosing settings keeps capture and autosave running in the system tray.", 9, color: Theme.Muted));
+        panel.Controls.Add(Theme.Label("Saved balances are kept between sessions.\n≈ is shown only after capture gaps or unsupported updates.\nClosing settings minimizes to the taskbar. Use the tray menu to exit.", 9, color: Theme.Muted));
         _overlay = new(prefs, Save);
         _merchant = new(prefs, Save);
         var menu = new ContextMenuStrip();
-        menu.Items.Add("Show settings", null, (_, _) => { Show(); WindowState = FormWindowState.Normal; Activate(); });
+        menu.Items.Add("Show settings", null, (_, _) => ShowSettings());
+        menu.Items.Add("Restore overlays", null, (_, _) => RestoreOverlays());
         menu.Items.Add("Open data folder", null, (_, _) => Process.Start(new ProcessStartInfo(TrackerPreferences.Folder) { UseShellExecute = true }));
         menu.Items.Add("Copy shop diagnostics", null, (_, _) => CopyShopDiagnostics());
         menu.Items.Add("Exit", null, (_, _) => { _exit = true; Close(); });
@@ -74,10 +82,28 @@ internal sealed class TrackerWindow : Form
             Visible = true,
             ContextMenuStrip = menu
         };
-        _tray.DoubleClick += (_, _) => { Show(); WindowState = FormWindowState.Normal; Activate(); };
+        _tray.DoubleClick += (_, _) => ShowSettings();
         _timer.Tick += (_, _) => UpdateState();
         _timer.Start();
         Shown += (_, _) => { Theme.Chrome(this); UpdateState(); };
+        Resize += (_, _) =>
+        {
+            if (WindowState == FormWindowState.Normal)
+                RestoreOverlays();
+        };
+    }
+    private void ShowSettings()
+    {
+        Show();
+        WindowState = FormWindowState.Normal;
+        Activate();
+        RestoreOverlays();
+    }
+    private void RestoreOverlays()
+    {
+        _overlay.RestoreOverlay();
+        _merchant.Reopen();
+        UpdateState();
     }
     private void Save()
     {
@@ -95,7 +121,7 @@ internal sealed class TrackerWindow : Form
         {
             Clipboard.SetText(JsonSerializer.Serialize(new
             {
-                AppVersion = "1.0.1",
+                AppVersion = "1.0.2",
                 s.Shop,
                 _scene.GameFocused,
                 _scene.ShopVisible,
@@ -108,6 +134,7 @@ internal sealed class TrackerWindow : Form
                 Dpi = DeviceDpi,
                 _prefs.MerchantInfo,
                 _prefs.MerchantManualDisplay,
+                _prefs.AlwaysOnTop,
                 HasPetOffers = s.Merchant is not null,
                 PanelVisible = _merchant.Visible
             }, new JsonSerializerOptions { WriteIndented = true }));
@@ -133,15 +160,15 @@ internal sealed class TrackerWindow : Form
         _storage.Text = s.SaveError ?? (s.SavePending ? "Autosave pending" : "Autosave active · " + s.Packets.ToString("N0") + " packets received");
         _shopState.Text = !merchantEnabled ? "Merchant panel disabled" : s.Merchant is null ?
             (s.Shop.LastMessageRejected ? "Shop data unavailable · reopen Pets or Special" : "Waiting for shop offers · open Pets or Special") :
-            !_scene.GameFocused ? "Merchant ready · return to the game" : _merchant.Visible ?
-            (_prefs.MerchantManualDisplay ? "Merchant displayed · manual mode" : "Merchant displayed · automatic detection") :
-            "Shop not detected · try Show merchant panel while game is focused";
+            _merchant.Visible ? (!_scene.GameFocused ? "Merchant visible · last observed shop offers" :
+            _prefs.MerchantManualDisplay ? "Merchant displayed · manual mode" : "Merchant displayed · automatic detection") :
+            !_scene.GameFocused ? "Merchant ready · return to the game" : "Shop not detected · try Show last merchant offers (manual mode)";
         if (_statusFile is not null)
             try
             {
                 File.WriteAllText(_statusFile, JsonSerializer.Serialize(new
                 {
-                    release = "1.0.1",
+                    release = "1.0.2",
                     at = PetTrackerService.Now,
                     Snapshot = s,
                     MerchantScene = _scene,
@@ -155,7 +182,7 @@ internal sealed class TrackerWindow : Form
         if (!_exit && e.CloseReason == CloseReason.UserClosing)
         {
             e.Cancel = true;
-            Hide();
+            WindowState = FormWindowState.Minimized;
             return;
         }
         base.OnFormClosing(e);

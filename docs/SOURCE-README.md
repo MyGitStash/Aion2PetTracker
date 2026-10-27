@@ -1,8 +1,8 @@
 # Aion2 Pet Tracker
 
-For the shop compatibility update and fallback option, see
-[Release 1.0.1](RELEASE-1.0.1.md). The original Release 1 notes below describe the
-baseline; current builds include the newer header search and tab compatibility.
+For current overlay visibility and multi-monitor behavior, see
+[the overlay update](RELEASE-1.0.2.md). The earlier
+[shop compatibility update](RELEASE-1.0.1.md) documents header search and tab IDs.
 
 A compact Windows overlay for pet souls, genus crystals and pet progress at
 the Cloud Merchant in AION 2. **Release 1** is the first named public release.
@@ -37,7 +37,7 @@ Npcap is a Windows capture driver and is installed once, not opened for each use
 - Transparent overlays, independent positions, opacity and click-through locking.
 - English interface and consistent number formatting.
 
-Closing settings keeps the tracker in the system tray. Use **Exit** in the tray
+Closing settings minimizes the tracker to the taskbar. Use **Exit** in the tray
 menu to stop it. Alt-Tab and idle time do not erase saved balances or add an
 approximation symbol. A real capture gap or unsupported update may mark a value
 with `≈` until a new complete snapshot arrives.

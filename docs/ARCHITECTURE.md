@@ -29,8 +29,16 @@ Npcap -> adapter/TCP selection -> reassembly -> framing/LZ4
   at most once a second while relevant. Pixel data is not persisted or sent.
   The search handles UI scale and translation; a second bounded anchor covers
   centred letterboxing. Manual display skips pixel capture and retains the
-  foreground-game and valid-offer requirements. The cached foreground-window
-  identity is checked again on every UI update, including after Alt-Tab.
+  valid-offer requirement. Background display reuses only the last observed game
+  scene, checks that its window/process still exists and never samples another
+  app's pixels. Returning to the game triggers a fresh probe. Disabling Always
+  on top restores the foreground-game requirement for the merchant panel.
+- **App/Rendering/OverlayRecovery** repairs native topmost state at most once a
+  second, or on foreground/display/DPI/handle changes. It uses NOACTIVATE and
+  reuploads the cached alpha surface only on recovery. Minimized windows reset
+  their managed state while hidden before ShowWithoutActivation; restoring a
+  visible minimized WinForms window can otherwise activate it. Saved merchant
+  positions use their selected monitor, including negative desktop coordinates.
 
 ## Data and uncertainty
 
@@ -45,7 +53,8 @@ information and do not manufacture extra farm drops.
 
 The service and state mutation run under the capture gate. Background storage
 and render invalidation avoid repeated work when data is unchanged. The settings
-window may be hidden without stopping capture or autosave.
+window minimizes to the taskbar without stopping capture or autosave. Restore
+overlays is also available from the tray and respects the visibility settings.
 
 ## Development entry points
 

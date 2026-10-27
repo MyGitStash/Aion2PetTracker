@@ -11,6 +11,7 @@ internal sealed class MerchantOverlay : Form
     private readonly TrackerPreferences _prefs;
     private readonly Action _save;
     private readonly Dictionary<int, Bitmap> _portraits = [];
+    private readonly OverlayRecovery _recovery = new();
     private MerchantView? _view;
     private Bitmap? _surface;
     private long _dismissed;
@@ -26,7 +27,7 @@ internal sealed class MerchantOverlay : Form
         AutoScaleMode = AutoScaleMode.None;
         FormBorderStyle = FormBorderStyle.None;
         ShowInTaskbar = false;
-        TopMost = true;
+        TopMost = prefs.AlwaysOnTop;
         StartPosition = FormStartPosition.Manual;
         MouseDown += (_, e) =>
         {
@@ -53,6 +54,7 @@ internal sealed class MerchantOverlay : Form
     {
         _dismissed = 0;
         _dirty = true;
+        _recovery.Request();
     }
     protected override CreateParams CreateParams
     {
@@ -67,7 +69,7 @@ internal sealed class MerchantOverlay : Form
     }
     internal void RefreshState(MerchantView? view, MerchantScene scene, bool enabled, bool preview = false, float scale = 1)
     {
-        if (!enabled || view is null || (!preview && (!scene.GameFocused || !scene.ShopVisible || view.ReceivedMs == _dismissed)))
+        if (!enabled || view is null || (!preview && ((!scene.GameFocused && !_prefs.AlwaysOnTop) || !scene.ShopVisible || view.ReceivedMs == _dismissed)))
         {
             if (Visible)
                 Hide();
@@ -80,8 +82,12 @@ internal sealed class MerchantOverlay : Form
                 RecreateHandle();
             _dirty = true;
         }
+        if (!preview)
+            _recovery.Maintain(this, _prefs.AlwaysOnTop, Present);
         float k = preview ? scale : DeviceDpi / 96f;
         var area = scene.Bounds.IsEmpty ? Screen.PrimaryScreen!.WorkingArea : Rectangle.Intersect(scene.Bounds, Screen.FromRectangle(scene.Bounds).WorkingArea);
+        if (_prefs.MerchantX is { } savedX && _prefs.MerchantY is { } savedY)
+            area = Screen.FromPoint(new(savedX, savedY)).WorkingArea;
         if (area.Width <= 0 || area.Height <= 0)
             area = Screen.PrimaryScreen!.WorkingArea;
         _rowsPerColumn = Math.Max(1, (int)(area.Height / k - 108) / 54);
@@ -108,6 +114,7 @@ internal sealed class MerchantOverlay : Form
         if (!Visible)
         {
             Show();
+            _recovery.Request();
             changed = true;
         }
         if (changed || _dirty)
@@ -115,6 +122,7 @@ internal sealed class MerchantOverlay : Form
             Present();
             _dirty = false;
         }
+        _recovery.Maintain(this, _prefs.AlwaysOnTop, Present);
     }
     private Bitmap? Portrait(int id)
     {
@@ -194,9 +202,12 @@ internal sealed class MerchantOverlay : Form
         _alpha = 0;
         Show();
         Present();
+        bool pinned = _prefs.AlwaysOnTop;
+        _prefs.AlwaysOnTop = false;
         RefreshState(view, new(false, true, Rectangle.Empty, 0), true);
         if (Visible)
             throw new InvalidOperationException("Merchant must hide outside the game");
+        _prefs.AlwaysOnTop = pinned;
         Show();
         Present();
         RefreshState(view, new(true, false, Rectangle.Empty, 0), true);
@@ -227,6 +238,13 @@ internal sealed class MerchantOverlay : Form
     {
         base.OnHandleCreated(e);
         _dirty = true;
+        _recovery.Request();
+    }
+    protected override void OnDpiChanged(DpiChangedEventArgs e)
+    {
+        base.OnDpiChanged(e);
+        _dirty = true;
+        _recovery.Request();
     }
     protected override void OnPaintBackground(PaintEventArgs e)
     {
@@ -244,6 +262,11 @@ internal sealed class MerchantOverlay : Form
     }
     protected override void WndProc(ref Message m)
     {
+        if (OverlayRecovery.IsRecoveryMessage(m.Msg))
+        {
+            _dirty = true;
+            _recovery.Request();
+        }
         if (m.Msg == 0x21)
         {
             m.Result = new IntPtr(3);

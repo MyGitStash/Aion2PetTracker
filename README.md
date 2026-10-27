@@ -26,6 +26,7 @@ Track your **pet souls, crystal balances and pet progress** with compact overlay
 - **Multi-pet farming** — Track several pets in separate cards.
 - **Crystal balances** — Keep your group crystals and Rainbow souls in view.
 - **Cloud Merchant information** — Check your saved pet progress while browsing pet offers.
+- **Always on top** — Keep overlays visible after Alt-Tab, including on a second monitor.
 
 ## 📸 Screenshots
 
@@ -71,7 +72,9 @@ A separate panel shows pet groups, levels and soul totals for the available pet 
 
 - Your progress **saves automatically**.
 - Keep the **Daten** folder when updating to preserve your settings and saved progress.
-- Closing the settings window keeps the tracker running in the system tray.
+- Closing settings minimizes the tracker to the taskbar. Click its taskbar icon to reopen it.
+- **Always on top** is enabled by default. Turn it off if you prefer other apps to cover the overlays.
+- Use **Restore overlays** in settings or the tray menu if you need to bring the overlays forward.
 - To close it completely, right-click the tray icon and select **Exit**.
 
 
@@ -79,7 +82,9 @@ A separate panel shows pet groups, levels and soul totals for the available pet 
 <summary><strong>Cloud Merchant panel missing?</strong></summary>
 
 Open **Pets** or **Special** in the shop and check the shop status in the tracker settings.
-If needed, enable **Show merchant panel while game is focused**. This uses the last received valid offers.
+If needed, enable **Show last merchant offers (manual mode)**. This uses the last received valid offers.
+With **Always on top** enabled, the panel keeps the last observed shop offers visible when you switch apps.
+It updates the shop view when you return to the game; it does not read another app’s screen.
 If it still does not appear, select **Copy shop diagnostics** from the tracker’s tray menu and include them in a bug report.
 
 </details>

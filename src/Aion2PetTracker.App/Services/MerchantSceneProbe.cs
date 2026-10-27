@@ -14,11 +14,13 @@ internal sealed record MerchantScene(bool GameFocused, bool ShopVisible, Rectang
 /// reads foreground/window metadata only. No screenshots are saved or uploaded.</summary>
 internal sealed class MerchantSceneProbe
 {
-    private sealed record Reading(IntPtr Window, bool Manual, MerchantScene Scene);
+    private sealed record Reading(IntPtr Window, bool Manual, MerchantScene Scene, uint ProcessId = 0);
     private static MerchantScene Empty => new(false, false, Rectangle.Empty, 0);
     private readonly HeaderSignature _signature;
     private Task<Reading>? _pending;
     private Reading? _latest;
+    private Reading? _lastGame;
+    private IntPtr _observedForeground;
     private long _next;
     private bool _manual;
 
@@ -34,26 +36,45 @@ internal sealed class MerchantSceneProbe
         {
             _manual = manual;
             _latest = null;
+            _lastGame = null;
             _next = 0;
         }
         if (_pending?.IsCompleted == true)
         {
             _latest = _pending.IsCompletedSuccessfully && _pending.Result.Manual == manual ? _pending.Result : null;
+            if (_latest?.Scene.GameFocused == true)
+                _lastGame = _latest;
             _pending = null;
         }
         if (!enabled)
         {
             _latest = null;
+            _lastGame = null;
             _next = 0;
             return Empty;
+        }
+        var foreground = GetForegroundWindow();
+        if (_observedForeground != foreground)
+        {
+            _observedForeground = foreground;
+            _next = 0;
         }
         if (_pending is null && now >= _next)
         {
             _next = now + 1000;
             _pending = Task.Run(() => Read(manual));
         }
-        // Never reuse a positive observation over another application after Alt-Tab.
-        return _latest is { } latest && latest.Window == GetForegroundWindow() ? latest.Scene : Empty;
+        if (_latest is { } latest && latest.Window == foreground && latest.Scene.GameFocused)
+            return latest.Scene;
+        // Retain the last observed game scene across Alt-Tab; never sample another app's pixels.
+        // The caller decides whether background display is enabled. A closed game invalidates it.
+        if (_lastGame is { } last && last.Window != foreground && IsWindow(last.Window))
+        {
+            GetWindowThreadProcessId(last.Window, out uint pid);
+            if (pid == last.ProcessId)
+                return last.Scene with { GameFocused = false };
+        }
+        return Empty;
     }
 
     private Reading Read(bool manual)
@@ -68,7 +89,7 @@ internal sealed class MerchantSceneProbe
             return new(hwnd, manual, Empty);
         var bounds = new Rectangle(origin.X, origin.Y, rect.Right, rect.Bottom);
         if (manual)
-            return new(hwnd, true, new(true, true, bounds, 0));
+            return new(hwnd, true, new(true, true, bounds, 0), pid);
         double[] scales = [bounds.Width / 1920d, bounds.Height / 1080d, 1, 1.25, 1.5, 2];
         // A letterboxed client can anchor its UI inside the centred 16:9 viewport.
         Point[] anchors = [Point.Empty, new(Math.Max(0, (int)Math.Round((bounds.Width - bounds.Height * 16d / 9) / 2)),
@@ -103,11 +124,11 @@ internal sealed class MerchantSceneProbe
                     break;
             }
             return GetForegroundWindow() != hwnd ? new(hwnd, false, Empty) :
-                new(hwnd, false, new(true, best.Score >= .78, bounds, best.Score, best.Scale, best.OffsetX, best.OffsetY));
+                new(hwnd, false, new(true, best.Score >= .78, bounds, best.Score, best.Scale, best.OffsetX, best.OffsetY), pid);
         }
         catch (Exception e) when (e is System.ComponentModel.Win32Exception or ArgumentException or ExternalException)
         {
-            return new(hwnd, false, new(true, false, bounds, 0));
+            return new(hwnd, false, new(true, false, bounds, 0), pid);
         }
     }
 
@@ -137,6 +158,7 @@ internal sealed class MerchantSceneProbe
         public int Left, Top, Right, Bottom;
     }
     [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] private static extern bool IsWindow(IntPtr hwnd);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint pid);
     [DllImport("user32.dll")] private static extern bool GetClientRect(IntPtr hwnd, out NativeRect rect);
     [DllImport("user32.dll")] private static extern bool ClientToScreen(IntPtr hwnd, ref NativePoint point);

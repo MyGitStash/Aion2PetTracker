@@ -1,4 +1,4 @@
-param([string]$Output = (Join-Path $PSScriptRoot '..\artifacts\release'), [string]$ReleaseTag = 'release-1.0.1')
+param([string]$Output = (Join-Path $PSScriptRoot '..\artifacts\release'), [string]$ReleaseTag = 'release-1.0.2')
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $publishExe = Join-Path $repoRoot 'artifacts\publish\Aion2PetTracker.exe'
@@ -67,7 +67,7 @@ try {
     $hashes = Get-ChildItem -LiteralPath $outputRoot -File | Where-Object { $_.Extension -in '.zip', '.bundle' } |
         Sort-Object Name | ForEach-Object { "$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())  $($_.Name)" }
     [IO.File]::WriteAllLines((Join-Path $outputRoot 'SHA256SUMS.txt'), [string[]]$hashes, [Text.UTF8Encoding]::new($false))
-    [ordered]@{ product = 'Aion2 Pet Tracker'; release = '1.0.1'; source_commit = $commit; tag = $ReleaseTag; npcap_bundled = $false; personal_data_included = $false } |
+    [ordered]@{ product = 'Aion2 Pet Tracker'; release = '1.0.2'; source_commit = $commit; tag = $ReleaseTag; npcap_bundled = $false; personal_data_included = $false } |
         ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot 'release.json') -Encoding utf8
     Write-Host "Archives ready: $outputRoot"
 } finally { Pop-Location }

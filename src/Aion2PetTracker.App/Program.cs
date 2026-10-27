@@ -33,6 +33,12 @@ internal static class Program
         }
         catch (Exception e)
         {
+            if (preview >= 0)
+            {
+                File.WriteAllText(Path.Combine(args[preview + 1], "preview-error.txt"), e.ToString());
+                Environment.ExitCode = 1;
+                return;
+            }
             Directory.CreateDirectory(TrackerPreferences.Folder);
             File.WriteAllText(Path.Combine(TrackerPreferences.Folder, "last-error.txt"), e.ToString());
             MessageBox.Show("Pet Tracker could not start.\nSee Daten/last-error.txt for details.", "Aion2 Pet Tracker", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -102,5 +108,6 @@ internal static class Program
             Tab = MerchantTab.Special,
             Rows = shop.Rows.Take(4).ToList()
         });
+        OverlayWindowChecks.Run(folder, prefs, overlay, pets, wallet, merchant, shop);
     }
 }
